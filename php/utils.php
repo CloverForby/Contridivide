@@ -1,10 +1,10 @@
 <?php
 
-function CreateEntity(string $EntityType, array $Params){
+function condiv_CreateEntity(string $EntityType, array $Params){
 	$results = civicrm_api4(strval($EntityType), 'create', ['values' => $Params,]);
 }
 
-function CheckIfExists(string $EntityType, string $EntityName) : bool{
+function condiv_CheckIfExists(string $EntityType, string $EntityName) : bool{
 	$result = civicrm_api4(strval($EntityType), 'get', [
 		  'where' => [
 			['name', '=', strval($EntityName)],
@@ -19,10 +19,10 @@ function CheckIfExists(string $EntityType, string $EntityName) : bool{
 	};
 }
 
-function CreateRecieptID($ContID, $Head, $Num){
+function condiv_CreateReceiptID($ContID, $Head, $Num){
 	$results = civicrm_api4('Contribution', 'update', [
 		  'values' => [
-			'contridiv_group.contridiv_recieptID' => strval($Head . $Num),
+			'contridiv_group.contridiv_receiptID' => strval($Head . $Num),
 		  ],
 		  'where' => [
 			['id', '=', $ContID],

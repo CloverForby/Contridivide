@@ -6,8 +6,8 @@ require_once 'php/arrays.php';
 // phpcs:disable
 use CRM_Contridivide_ExtensionUtil as E;
 // phpcs:enable
-global $params;
-$params = $civArrays;
+global $condiv_array;
+$condiv_array = $civArrays;
 
 /**
  * Implements hook_civicrm_config().
@@ -33,24 +33,24 @@ function contridivide_civicrm_install(): void {
  * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_enable
  */
 function contridivide_civicrm_enable(){
-  global $params;
-  foreach ($params as $entity){
-	  $check = CheckIfExists($entity['type'],  $entity['name']);
+  global $condiv_array;
+  foreach ($condiv_array as $entity){
+	  $check = condiv_CheckIfExists($entity['type'],  $entity['name']);
 	  if ($check == false)  {
-		  CreateEntity($entity['type'], $entity['params']);
+		  condiv_CreateEntity($entity['type'], $entity['params']);
 	  } else {
 		  continue;
 	  }
   }
 }
 
-function contridivide_civicrm_post(string $op, string $objectName, int $objectId, &$objectRef){
+function contridivide_civicrm_PostCommit(string $op, string $objectName, int $objectId, &$objectRef){
 	if ($objectName == "Contribution" && $op == "create" ){
 		
 		//How the recieptID will be formatted (Example: TD_1)
 		
 		$idHead = "error"; //idhead will either hold "TD_" or "NT_"
-		$idNum = 0; //idNum will hold the num end of the reciept ID "1"
+		$idNum = 1; //idNum will hold the num end of the reciept ID "1"
 		$whereArray = "";
 		//Step 1: Get the financial type id that was inserted into the contribution
 		$getContributionFinType = civicrm_api4('Contribution', 'get', [
@@ -101,10 +101,10 @@ function contridivide_civicrm_post(string $op, string $objectName, int $objectId
 				}
 			}
 			$idNum += 1;
-			CreateRecieptID($objectId, $idHead, $idNum);
+			condiv_CreateRecieptID($objectId, $idHead, $idNum);
 		} else {
 			//if there is not, that means no contributions were made, thus we set the idNum to 0
-			CreateRecieptID($objectId, $idHead, 0);
+			condiv_CreateRecieptID($objectId, $idHead, 1);
 		}
 	}
 }
