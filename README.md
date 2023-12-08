@@ -14,9 +14,9 @@ A Custom Civicrm extension that upon enabling will create a custom field called 
 
 When a new contribution is made, Reciept ID will be filled with a unique ID, based on whether the Financial Type chosen is deductable or not.
 
-If it's tax deductable, it starts with "TD_", if not it starts with "NT_", the number that follows is an auto-increment that is seperate from the other deductable type 
+If it's tax deductable, it starts with "TDR", if not it starts with "NTDR", the number that follows is an auto-increment that is seperate from the other deductable type 
 
-(Example: if there's an NT_12, the new Contribution id will be NT_13, the auto increment will not be affected by reciept id's starting with TD_)
+(Example: if there's an NTDR_12, the new Contribution id will be NTDR_13, the auto increment will not be affected by reciept id's starting with TDR)
 
 
 # Requirements
