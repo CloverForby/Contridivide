@@ -6,8 +6,8 @@ require_once 'php/arrays.php';
 // phpcs:disable
 use CRM_Contridivide_ExtensionUtil as E;
 // phpcs:enable
-global $params;
-$params = $civArrays;
+global $condiv_arrays;
+$condiv_arrays = $condivArrays;
 
 /**
  * Implements hook_civicrm_config().
@@ -33,24 +33,24 @@ function contridivide_civicrm_install(): void {
  * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_enable
  */
 function contridivide_civicrm_enable(){
-  global $params;
-  foreach ($params as $entity){
-	  $check = CheckIfExists($entity['type'],  $entity['name']);
+  global $condiv_arrays;
+  foreach ($condiv_arrays as $entity){
+	  $check = condiv_CheckIfExists($entity['type'],  $entity['name']);
 	  if ($check == false)  {
-		  CreateEntity($entity['type'], $entity['params']);
+		  condiv_CreateEntity($entity['type'], $entity['params']);
 	  } else {
 		  continue;
 	  }
   }
 }
 
-function contridivide_civicrm_post(string $op, string $objectName, int $objectId, &$objectRef){
+function contridivide_civicrm_postCommit(string $op, string $objectName, int $objectId, &$objectRef){
 	if ($objectName == "Contribution" && $op == "create" ){
 		
-		//How the recieptID will be formatted (Example: TD_1)
+		//How the receiptID will be formatted (Example: TD_1)
 		
 		$idHead = "error"; //idhead will either hold "TD_" or "NT_"
-		$idNum = 0; //idNum will hold the num end of the reciept ID "1"
+		$idNum = 1; //idNum will hold the num end of the receipt ID "1"
 		$whereArray = "";
 		//Step 1: Get the financial type id that was inserted into the contribution
 		$getContributionFinType = civicrm_api4('Contribution', 'get', [
@@ -73,17 +73,17 @@ function contridivide_civicrm_post(string $op, string $objectName, int $objectId
 		
 		if ($idHead == "TDR"){
 			$whereArray = [
-				['contridiv_group.contridiv_recieptID', 'CONTAINS', $idHead],
-				['contridiv_group.contridiv_recieptID', 'NOT CONTAINS', 'N'],
+				['contridiv_group.contridiv_receiptID', 'CONTAINS', $idHead],
+				['contridiv_group.contridiv_receiptID', 'NOT CONTAINS', 'N'],
 			];
 		} else {
-			$whereArray = [['contridiv_group.contridiv_recieptID', 'CONTAINS', $idHead]];
+			$whereArray = [['contridiv_group.contridiv_receiptID', 'CONTAINS', $idHead]];
 		}
 		
 		//Step 4: Get all contributions that have the heading of "TD_" or "NT_"
 		$contributions = civicrm_api4('Contribution', 'get', [
 		  'select' => [
-			'contridiv_group.contridiv_recieptID',
+			'contridiv_group.contridiv_receiptID',
 		  ],
 		  'where' => $whereArray,
 		  'checkPermissions' => FALSE,
@@ -94,17 +94,17 @@ function contridivide_civicrm_post(string $op, string $objectName, int $objectId
 			//if there are contributions, go through all of them
 			foreach($contributions as $con){
 				//get the number part of the contribution name
-				$id = (int)substr($con['contridiv_group.contridiv_recieptID'], strlen($idHead));
+				$id = (int)substr($con['contridiv_group.contridiv_receiptID'], strlen($idHead));
 				//compare if the current id is more than the highest id num, if it is, saves the current id to the highest num
 				if ($id > $idNum){
 					$idNum = $id;
 				}
 			}
 			$idNum += 1;
-			CreateRecieptID($objectId, $idHead, $idNum);
+			condiv_CreateReceiptID($objectId, $idHead, $idNum);
 		} else {
 			//if there is not, that means no contributions were made, thus we set the idNum to 0
-			CreateRecieptID($objectId, $idHead, 0);
+			condiv_CreateReceiptID($objectId, $idHead, 1);
 		}
 	}
 }
